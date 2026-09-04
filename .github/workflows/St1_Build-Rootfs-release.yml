@@ -35,6 +35,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -137,4 +139,4 @@ jobs:
         files: |
           imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
       env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
