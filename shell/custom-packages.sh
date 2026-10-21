@@ -3,14 +3,14 @@
 # ============= 若启用 则打开注释 ============================
 
 # 分区扩容 by sirpdboy 
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-partexp"
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-partexp-zh-cn"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-partexp"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-partexp-zh-cn"
 # 酷猫主题 by sirpdboy 
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-theme-kucat"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-theme-kucat"
 # 进阶设置 by sirpdboy 
 # 当luci-app-advancedplus插件开启时 需排除冲突项 luci-app-argon-config和luci-i18n-argon-config-zh-cn 减号代表排除
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-advancedplus -luci-app-argon-config"
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-advancedplus-zh-cn -luci-i18n-argon-config-zh-cn"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-advancedplus -luci-app-argon-config"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-advancedplus-zh-cn -luci-i18n-argon-config-zh-cn"
 # 网络测速 by sirpdboy 
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-netspeedtest"
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-netspeedtest-zh-cn"
@@ -23,6 +23,15 @@
 # 设置向导 by sirpdboy
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-netwizard"
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-netwizard-zh-cn"
+
+# ============= 第三方插件的依赖补齐 =============================
+# partexp 依赖 bc / f2fs-tools，这两项 iStoreOS manifest 未收录，
+# 已把 ipk 放入 files/packages/custom/，需显式加进构建清单。
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES bc f2fs-tools f2fsck"
+# partexp 依赖的其他工具 iStoreOS manifest 有，但默认未构建，需显式列出
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES parted btrfs-progs fdisk blkid losetup resize2fs e2fsprogs kmod-loop"
+# kucat 主题声明依赖 wget，OpenWrt 里由 wget-ssl 提供虚拟包名 wget
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES wget-ssl"
 
 # ============= 若去除组件 则打开注释 ============================
 # 若去掉istore商店 则打开注释

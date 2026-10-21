@@ -22,14 +22,19 @@ else
   # 解压并拷贝ipk到packages目录
   sh prepare-packages.sh
   echo "打印imagebuilder/packages目录结构"
-  ls -lah packages/ || true
-  # 重新生成 packages 本地索引，否则 opkg 看不到新放进去的 ipk
-  echo "🔄 生成 packages/Packages 索引"
-  rm -f packages/Packages packages/Packages.gz packages/Packages.manifest
-  ./scripts/ipkg-make-index.sh packages > packages/Packages
-  gzip -kf packages/Packages
-  grep -c '^Package:' packages/Packages || true
+  ls -lah packages/ | head -50 || true
 fi
+
+# ============= 重建本地包索引 =============
+# 必须放在所有 ipk 落地之后（含 files/packages 拷入的、run 解包得到的），
+# 否则 opkg 看不到这些包。无条件执行，因为即使没选第三方插件，
+# files/packages/custom/ 里的依赖包也需要索引。
+echo "🔄 重建 packages/Packages 索引"
+rm -f packages/Packages packages/Packages.gz packages/Packages.manifest
+./scripts/ipkg-make-index.sh packages > packages/Packages
+gzip -kf packages/Packages
+PKG_COUNT=$(grep -c '^Package:' packages/Packages || true)
+echo "✅ 索引包数量: ${PKG_COUNT:-0}"
 
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
