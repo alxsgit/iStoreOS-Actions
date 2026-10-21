@@ -2,19 +2,8 @@ name: 💿 St1_Build-Rootfs-release
 on:
   workflow_dispatch:
     inputs:
-      build_version:
-        description: "1、请选择构建版本"
-        required: true
-        default: '20260924'
-        type: choice
-        options:
-          - '20260924'
-          - '20260911'
-          - '20260731'
-          - '20260703'
-          - '20260605'
       network_settings:
-        description: "2、请选择初始网络配置"
+        description: "1、请选择初始网络配置"
         required: true
         default: 'dhcp'
         type: choice
@@ -22,16 +11,18 @@ on:
           - 'static'
           - 'dhcp'
       ipaddr:
-        description: '3、请输入管理IP（选择static时必填）'
+        description: '2、请输入管理IP（选择static时必填）'
         required: true
         default: '192.168.5.88'
       gateway:
-        description: '4、请输入默认网关（选择static时必填）'
+        description: '3、请输入默认网关（选择static时必填）'
         required: true
         default: '192.168.5.1'
 
 env:
-  VERSION: 25.12.5
+  VERSION: 24.10.2
+  IB_VERSION: 24.10
+  IB_SHA256: 56b4b3024343da8156fb83e9cb258181e53ce776ed87d3727ca4b08969b73283
 
 jobs:
   build:
@@ -74,8 +65,11 @@ jobs:
 
     - name: ⏬ 下载 ImageBuilder
       run: |
-        curl -L -o imagebuilder.tar.zst https://github.com/Kwonelee/iStoreOS-Actions/releases/download/iStoreOS-ImageBuilder/${{ inputs.build_version }}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst
-        tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
+        IB_URL="https://fw.koolcenter.com/iStoreOS/ib/${IB_VERSION}/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+        echo "下载地址: $IB_URL"
+        curl -fL --retry 3 -o imagebuilder.tar.zst "$IB_URL"
+        echo "${IB_SHA256}  imagebuilder.tar.zst" | sha256sum -c -
+        tar --use-compress-program=unzstd -xf imagebuilder.tar.zst
         mv istoreos-imagebuilder-* imagebuilder
 
     - name: ⏬ 复制并设置必备文件
@@ -84,7 +78,7 @@ jobs:
         #cp arm64/{Makefile,repositories.conf} imagebuilder/
         cp arm64/repositories imagebuilder/
         cp shell/*-packages.sh imagebuilder/
-        find files/packages/ -name "*.apk" -exec cp {} imagebuilder/packages/ \;
+        find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
         mkdir -p imagebuilder/files/etc/{uci-defaults,banner1}
         # 添加开机启动脚本
@@ -101,6 +95,8 @@ jobs:
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
         sed -i "s|CONFIG_TARGET_ROOTFS_SQUASHFS=.*|# CONFIG_TARGET_ROOTFS_SQUASHFS is not set|g" .config
         sed -i "s|CONFIG_TARGET_IMAGES_GZIP=.*|# CONFIG_TARGET_IMAGES_GZIP is not set|g" .config
+        echo "打印 imagebuilder/packages 中的本地包"
+        ls -1 packages/ || true
         echo "打印action目录结构"
         tree -L 1
 
@@ -127,7 +123,7 @@ jobs:
         body: |
           📌 版本： iStoreOS-${{ env.VERSION }}-RELEASE（imagebuilder构建，插件集成与官方一致）
           
-          📂 来源： https://fw.koolcenter.com/iStoreOS/ib/armsr/
+          📂 来源： https://fw.koolcenter.com/iStoreOS/ib/24.10/armsr/ （opkg/ipk 体系）
           
           🧠 内核： Please Login to iStoreOS → System → Amlogic Service → Replace the Kernel
           
