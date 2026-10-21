@@ -245,18 +245,24 @@ on:
           - ztl-a568
           - zysj
       openwrt_kernel:
-        description: "2、请选择内核版本"
+        description: "2、请选择内核版本（必须填具体版本号）"
         required: true
-        default: "6.6.y"
+        default: "6.6.159"
         type: choice
         options:
-          - 6.6.y
-          - 6.12.y
-          - 6.18.y
+          - 6.6.159
+          - 6.6.158
+          - 6.6.157
+          - 6.12.113
+          - 6.12.112
+          - 6.12.111
+          - 6.18.57
+          - 6.18.56
+          - 6.18.55
       auto_kernel:
-        description: "自动使用最新内核-未匹配则自动"
+        description: "自动使用最新内核-未匹配则自动（留 true 会用 6.6.y 模糊名，易 404，建议关闭）"
         required: false
-        default: true
+        default: false
         type: boolean
       kernel_usage:
         description: "3、请选择内核标签"
